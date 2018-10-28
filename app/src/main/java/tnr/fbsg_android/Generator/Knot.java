@@ -1,5 +1,7 @@
 package tnr.fbsg_android.Generator;
 
+import android.graphics.Color;
+
 public class Knot
 {
     public enum KnotDirection
@@ -13,7 +15,7 @@ public class Knot
     }
 
     private KnotDirection direction;
-    private Colour colour;
+    private int colour;
 
     Knot()
     {
@@ -49,11 +51,11 @@ public class Knot
         this.direction = direction;
     }
 
-    public Colour getColour() {
+    public int getColour() {
         return colour;
     }
 
-    public void setColour(Colour colour) {
+    public void setColour(int colour) {
         this.colour = colour;
     }
 }

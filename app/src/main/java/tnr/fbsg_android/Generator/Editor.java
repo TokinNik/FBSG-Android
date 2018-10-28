@@ -1,5 +1,7 @@
 package tnr.fbsg_android.Generator;
 
+import android.support.annotation.Nullable;
+
 import java.util.ArrayList;
 
 public class Editor
@@ -20,6 +22,9 @@ public class Editor
         }
         this.scheme = scheme;
     }
+
+    public Scheme getScheme()
+    {return scheme;}
 
     public void addRope()
     {
@@ -65,7 +70,7 @@ public class Editor
             }
             row.setRopesUp(ropesUp);
             row.setRopesDown(ropesUp);
-            row.makeRow();
+            row.makeRow(scheme);
             i++;
         }
         ArrayList<Rope> buf1 = scheme.getRopeUp();
@@ -126,7 +131,7 @@ public class Editor
             }
             row.setRopesUp(ropesUp);
             row.setRopesDown(ropesUp);
-            row.makeRow();
+            row.makeRow(scheme);
             i++;
         }
         ArrayList<Rope> buf1 = scheme.getRopeUp();
@@ -156,7 +161,7 @@ public class Editor
                 knots.add(new Knot(fullRow ? Knot.KnotDirection.LEFT : Knot.KnotDirection.RIGHT_EMPTY));
         }
         ArrayList<Integer> ropesUp = new ArrayList<>(scheme.getRows().get(rowSize-1).getRopesDown());
-        scheme.getRows().add(new Row(rowSize, ropesUp, knots, fullRow ? Row.RowType.FULL : Row.RowType.OPEN_RIGHT));
+        scheme.getRows().add(new Row(rowSize, ropesUp, knots, fullRow ? Row.RowType.FULL : Row.RowType.OPEN_RIGHT, scheme));
 
         ArrayList<Knot> knots1 = new ArrayList<>();
         knots1.add(new Knot(Knot.KnotDirection.LEFT_EMPTY));
@@ -168,7 +173,7 @@ public class Editor
             else
                 knots1.add(new Knot(fullRow ? Knot.KnotDirection.RIGHT_EMPTY: Knot.KnotDirection.LEFT));
         }
-        scheme.getRows().add(new Row(rowSize+1, scheme.getRows().get(rowSize).getRopesDown(), knots1, fullRow ? Row.RowType.OPEN_RIGHT : Row.RowType.FULL));
+        scheme.getRows().add(new Row(rowSize+1, scheme.getRows().get(rowSize).getRopesDown(), knots1, fullRow ? Row.RowType.OPEN_RIGHT : Row.RowType.FULL, scheme));
 
         ArrayList<Rope> buf1 = scheme.getRopeUp();
         ArrayList<Rope> buf = new ArrayList<>();
@@ -207,14 +212,18 @@ public class Editor
         scheme.getRopeDown().addAll(buf);
     }
 
-    public void changeRopeCol(int ropeId, Colour newColour)
+    public void changeRopeColor(int ropeId, int newColour)
     {
         scheme.getRopeUp().get(ropeId).setColour(newColour);
+        reBuild();
     }
 
-    public void changeKnotDirection(Knot knot, Knot.KnotDirection newDirection)
+    public void changeKnotDirection(Knot knot, @Nullable Knot.KnotDirection newDirection)
     {
-        knot.setDirection(newDirection);
+        if (newDirection != null)
+            knot.setDirection(newDirection);
+        else
+            knot.changeDirection();
 
         reBuild();
 
@@ -248,7 +257,7 @@ public class Editor
             }
             row.setRopesUp(ropesUp);
             row.setRopesDown(ropesUp);
-            row.makeRow();
+            row.makeRow(scheme);
             i++;
         }
     }

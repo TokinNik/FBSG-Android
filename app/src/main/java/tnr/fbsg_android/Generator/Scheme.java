@@ -31,13 +31,13 @@ public class Scheme
         ropesUp.add(3);
         ropesUp.add(4);
         ropesUp.add(5);
-        rows.add(new Row(0, ropesUp, knots, Row.RowType.FULL));
+        rows.add(new Row(0, ropesUp, knots, Row.RowType.FULL, this));
         ArrayList<Knot> knots1 = new ArrayList<>();
         knots1.add(new Knot(Knot.KnotDirection.LEFT_EMPTY));
         knots1.add(new Knot());
         knots1.add(new Knot());
         knots1.add(new Knot(Knot.KnotDirection.RIGHT_EMPTY));
-        rows.add(new Row(1, rows.get(0).getRopesDown(), knots1, Row.RowType.NOT_FULL));
+        rows.add(new Row(1, rows.get(0).getRopesDown(), knots1, Row.RowType.NOT_FULL, this));
         ropeDown.add(ropeUp.get(1));
         ropeDown.add(ropeUp.get(3));
         ropeDown.add(ropeUp.get(0));

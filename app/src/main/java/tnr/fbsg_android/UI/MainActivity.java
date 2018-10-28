@@ -2,6 +2,7 @@ package tnr.fbsg_android.UI;
 
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -27,12 +28,12 @@ public class MainActivity extends AppCompatActivity {
         Resources resources = getResources();
         Scheme scheme = new Scheme(0);
         Editor editor = new Editor(scheme);
+        schemeEditorView.setEditor(editor);
         int i = 0;
         for (Row row : scheme.getRows())
         {
             for (Knot k : row.getKnots())
             {
-
                 switch (k.getDirection())
                 {
                     case LEFT:
@@ -55,12 +56,18 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     default:
                         break;
-
                 }
+                schemeEditorView.addKnot(new DrawKnot(k, row.getId(), i));
                 i++;
             }
             i = 0;
         }
+
+        editor.changeRopeColor(1, Color.rgb(120, 0, 0));
+        editor.changeRopeColor(2, Color.rgb(0, 120, 0));
+        editor.changeRopeColor(3, Color.rgb(0, 0, 120));
+        editor.changeRopeColor(4, Color.rgb(120, 120, 0));
+        editor.changeRopeColor(5, Color.rgb(120, 0, 120));
     }
 
 }

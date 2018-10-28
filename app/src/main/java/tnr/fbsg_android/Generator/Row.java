@@ -1,5 +1,9 @@
 package tnr.fbsg_android.Generator;
 
+import android.graphics.Color;
+import android.support.annotation.Nullable;
+import android.util.Log;
+
 import java.util.ArrayList;
 
 public class Row
@@ -12,32 +16,36 @@ public class Row
         OPEN_RIGHT
     }
 
+    private final String TAG = "Row";
     private RowType type;
     private ArrayList<Knot> knots = new ArrayList<>();
     private ArrayList<Integer> ropesUp = new ArrayList<>();
     private ArrayList<Integer> ropesDown = new ArrayList<>();
     private int id;
+    private final Scheme currentScheme;
 
-    Row(int id, ArrayList<Integer> ropesUp, ArrayList<Knot> knots, ArrayList<Integer> ropesDown,  RowType type)
+    Row(int id, ArrayList<Integer> ropesUp, ArrayList<Knot> knots, ArrayList<Integer> ropesDown, Scheme scheme, RowType type)
     {
         this.id = id;
         this.knots = knots;
         this.ropesUp = ropesUp;
         this.ropesDown = ropesDown;
         this.type = type;
+        this.currentScheme = scheme;
     }
 
-    Row(int id, ArrayList<Integer> ropesUp, ArrayList<Knot> knots,  RowType type)
+    Row(int id, ArrayList<Integer> ropesUp, ArrayList<Knot> knots,  RowType type, Scheme scheme)
 {
     this.id = id;
     this.knots = knots;
     this.ropesUp = ropesUp;
     this.ropesDown.addAll(ropesUp);
     this.type = type;
-    makeRow();
+    this.currentScheme = scheme;
+    makeRow(currentScheme);
 }
 
-    public void makeRow()
+    public void makeRow(@Nullable Scheme scheme )
     {
         int i = 0;
         for (Knot k:knots)
@@ -45,22 +53,42 @@ public class Row
             if (k.getDirection() == Knot.KnotDirection.LEFT_EMPTY)
             {
                 ropesDown.set(i,ropesUp.get(i));
+                k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
                 i++;
                 continue;
             }
             if (i + 1 == ropesUp.size())
             {
                 ropesDown.set(i,ropesUp.get(i));
+                k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
                 break;
             }
             if (k.getDirection() == Knot.KnotDirection.RIGHT || k.getDirection() == Knot.KnotDirection.LEFT)
             {
+                if (k.getDirection() == Knot.KnotDirection.LEFT)
+                {
+                    k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour());
+                }
+                else
+                {
+                    k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
+                }
+                Log.d(TAG, ropesUp.get(i) + " " + ropesUp.get(i+1) + " " + i + " " + currentScheme.getRopeUp().get(ropesUp.get(i)).getColour() + " " + currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour()  + " " + k.getDirection());
                 int buf = ropesUp.get(i);
                 ropesDown.set(i, ropesUp.get(i+1));
                 ropesDown.set(i+1, buf);
             }
             else
             {
+                if (k.getDirection() == Knot.KnotDirection.LEFT_ANGLE)
+                {
+                    k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
+                }
+                else
+                {
+                    k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour());
+                }
+                Log.d(TAG, ropesUp.get(i+1) + " " + i + " " + currentScheme.getRopeUp().get(ropesUp.get(i)).getColour() + " " + currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour() + " " + k.getDirection());
                 ropesDown.set(i,ropesUp.get(i));
                 ropesDown.set(i+1,ropesUp.get(i+1));
             }

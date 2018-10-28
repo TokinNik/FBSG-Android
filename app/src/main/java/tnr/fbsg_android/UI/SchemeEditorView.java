@@ -18,7 +18,9 @@ import android.view.View;
 
 import java.util.ArrayList;
 
+import tnr.fbsg_android.Generator.Editor;
 import tnr.fbsg_android.Generator.Knot;
+import tnr.fbsg_android.Generator.Rope;
 import tnr.fbsg_android.R;
 
 public class SchemeEditorView extends View
@@ -33,10 +35,13 @@ public class SchemeEditorView extends View
     private float posLeftStart;
     private float posTopStart;
     private float scaleFactor = 1.0f;
+    private float knotSize = 25f;
     private GestureDetector gestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
     private int maxWidth = Integer.MAX_VALUE;
     ArrayList<ImageKnot> knotsImg;
+    ArrayList<DrawKnot> knotsDraw;
+    Editor editor;
 
     public SchemeEditorView(Context context) {
         super(context);
@@ -68,13 +73,23 @@ public class SchemeEditorView extends View
         gestureDetector = new GestureDetector(context, new MyGestureListener());
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
         knotsImg = new ArrayList<>();
+        knotsDraw = new ArrayList<>();
         options.inMutable = true;
+        paint.setAntiAlias(true);
     }
 
+
+    public void setEditor(Editor editor) {
+        this.editor = editor;
+    }
 
     public void addKnot(ImageKnot imageKnot)
     {
         knotsImg.add(imageKnot);
+    }
+    public void addKnot(DrawKnot drawKnot)
+    {
+        knotsDraw.add(drawKnot);
     }
 
     @Override
@@ -125,7 +140,8 @@ public class SchemeEditorView extends View
 
         canvas.scale(scaleFactor, scaleFactor);
         canvas.drawColor(paint.getColor());
-        for (int i = 0; i < knotsImg.size(); i++)
+
+        /*for (int i = 0; i < knotsImg.size(); i++)
         {
             ImageKnot ik = knotsImg.get(i);
             if (ik.getRowId()%2 == 0)
@@ -134,6 +150,99 @@ public class SchemeEditorView extends View
             else
                 canvas.drawBitmap(ik.getImage(), posLeft + (ik.getKnotId() * ik.getImage().getWidth()*2 * scaleFactor - ik.getImage().getWidth()/2 * scaleFactor),
                         posTop + ik.getRowId() * ik.getImage().getHeight() * 1.5f * scaleFactor, null);
+        }*/
+
+
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);//заготовка прооисовки нитей
+        paint.setColor(editor.getScheme().getRopeUp().get(editor.getScheme().getRows().get(0).getRopesDown().get(0)).getColour());
+        paint.setStrokeWidth(10);
+        canvas.drawLine(knotsDraw.get(0).getX(), knotsDraw.get(0).getY(), knotsDraw.get(3).getX(), knotsDraw.get(3).getY(), paint);
+
+
+        for (int i = 0; i < knotsDraw.size(); i++)
+        {
+            DrawKnot dk = knotsDraw.get(i);
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(dk.getKnot().getColour());
+            paint.setStrokeWidth(1);
+            float x;
+            float y;
+            if (dk.getRowId()%2 == 0)
+            {
+                x = posLeft + (dk.getKnotId() * knotSize * 4);
+                y = posTop;
+                dk.setX(x);
+                dk.setY(y);
+                canvas.drawCircle(x, y, knotSize, paint);
+            }
+            else
+            {
+                x = posLeft + (dk.getKnotId() * knotSize * 4 - knotSize * 2);
+                y = posTop + dk.getRowId() * knotSize * 4f;
+                dk.setX(x);
+                dk.setY(y);
+                canvas.drawCircle(x, y, knotSize, paint);
+            }
+
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(Color.BLACK);//DrawKnot getColor
+            paint.setStrokeWidth(2);
+
+            canvas.drawCircle(x, y, knotSize, paint);
+            float shift = knotSize * 0.6f;
+
+            switch (dk.getKnot().getDirection())
+            {
+                case LEFT:
+                    canvas.drawLine(x - shift, y + shift, x + shift, y - shift, paint);
+                    canvas.drawLine(x - shift, y + shift, x - shift, y, paint);
+                    canvas.drawLine(x - shift, y + shift, x, y + shift, paint);
+                    break;
+                case RIGHT:
+                    canvas.drawLine(x + shift, y + shift, x - shift, y - shift, paint);
+                    canvas.drawLine(x + shift, y + shift, x + shift, y, paint);
+                    canvas.drawLine(x + shift, y + shift, x, y + shift, paint);
+                    break;
+                case LEFT_ANGLE:
+                    canvas.drawLine(x - shift, y + shift, x, y, paint);
+                    canvas.drawLine(x, y, x - shift, y - shift, paint);
+                    canvas.drawLine(x - shift, y + shift, x - shift, y, paint);
+                    canvas.drawLine(x - shift, y + shift, x, y + shift, paint);
+                    break;
+                case RIGHT_ANGLE:
+                    canvas.drawLine(x + shift, y + shift, x , y , paint);
+                    canvas.drawLine(x, y, x + shift , y - shift , paint);
+                    canvas.drawLine(x + shift, y + shift, x + shift, y, paint);
+                    canvas.drawLine(x + shift, y + shift, x, y + shift, paint);
+                    break;
+                case LEFT_EMPTY:
+                    canvas.drawLine(x - shift, y + shift, x + shift, y - shift, paint);
+                    canvas.drawLine(x - shift, y + shift, x - shift, y, paint);
+                    canvas.drawLine(x - shift, y + shift, x, y + shift, paint);
+                    break;
+                case RIGHT_EMPTY:
+                    canvas.drawLine(x - shift, y + shift, x + shift, y - shift, paint);
+                    canvas.drawLine(x - shift, y + shift, x - shift, y, paint);
+                    canvas.drawLine(x - shift, y + shift, x, y + shift, paint);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        for (Rope rope: editor.getScheme().getRopeUp())
+        {
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            paint.setColor(rope.getColour());
+            canvas.drawCircle(posLeft + knotSize * rope.getId(), posTop - 50, 10, paint);
+        }
+
+        ArrayList<Integer> ropesDown = editor.getScheme().getRows().get(0).getRopesDown();
+        for (int i = 0; i < ropesDown.size(); i++)
+        {
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            paint.setColor(editor.getScheme().getRopeUp().get(ropesDown.get(i)).getColour());
+            canvas.drawCircle(posLeft + knotSize * i, posTop + 50, 10, paint);
         }
     }
 
@@ -161,7 +270,7 @@ public class SchemeEditorView extends View
         {
             float pointX = e.getX();
             float pointY = e.getY();
-
+/*
             for (ImageKnot ik: knotsImg)
             {
                 float y = posTop + ik.getRowId() * ik.getImage().getHeight() * 1.5f;
@@ -226,6 +335,16 @@ public class SchemeEditorView extends View
                         }
                         break;
                     }
+                }
+            }
+*/
+            for (DrawKnot dk: knotsDraw)
+            {
+                if (Math.pow(pointX - dk.getX(), 2) + Math.pow(pointY - dk.getY(), 2) <= Math.pow(knotSize, 2))
+                {
+                    editor.changeKnotDirection(dk.getKnot(), null);
+                    invalidate();
+                    break;
                 }
             }
 
