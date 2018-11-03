@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Row
 {
-    static enum RowType
+    public enum RowType
     {
         FULL,
         NOT_FULL,
@@ -54,6 +54,10 @@ public class Row
             {
                 ropesDown.set(i,ropesUp.get(i));
                 k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
+                k.setFirstUp(k.getColour());
+                k.setSecondUp(k.getColour());
+                k.setFirstDown(k.getColour());
+                k.setSecondDown(k.getColour());
                 i++;
                 continue;
             }
@@ -61,6 +65,10 @@ public class Row
             {
                 ropesDown.set(i,ropesUp.get(i));
                 k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
+                k.setFirstUp(k.getColour());
+                k.setSecondUp(k.getColour());
+                k.setFirstDown(k.getColour());
+                k.setSecondDown(k.getColour());
                 break;
             }
             if (k.getDirection() == Knot.KnotDirection.RIGHT || k.getDirection() == Knot.KnotDirection.LEFT)
@@ -68,12 +76,21 @@ public class Row
                 if (k.getDirection() == Knot.KnotDirection.LEFT)
                 {
                     k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour());
+                    k.setFirstUp(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
+                    k.setSecondUp(k.getColour());
+                    k.setFirstDown(k.getColour());
+                    k.setSecondDown(k.getFirstUp());
                 }
                 else
                 {
                     k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
+                    k.setFirstUp(k.getColour());
+                    k.setSecondUp((currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour()));
+                    k.setFirstDown(k.getSecondUp());
+                    k.setSecondDown(k.getColour());
                 }
-                Log.d(TAG, ropesUp.get(i) + " " + ropesUp.get(i+1) + " " + i + " " + currentScheme.getRopeUp().get(ropesUp.get(i)).getColour() + " " + currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour()  + " " + k.getDirection());
+                //Log.d(TAG, ropesUp.get(i) + " " + ropesUp.get(i+1) + " " + i + " " + currentScheme.getRopeUp().get(ropesUp.get(i)).getColour() + " " + currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour()  + " " + k.getDirection());
+
                 int buf = ropesUp.get(i);
                 ropesDown.set(i, ropesUp.get(i+1));
                 ropesDown.set(i+1, buf);
@@ -83,12 +100,21 @@ public class Row
                 if (k.getDirection() == Knot.KnotDirection.LEFT_ANGLE)
                 {
                     k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
+                    k.setFirstUp(k.getColour());
+                    k.setSecondUp(currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour());
+                    k.setFirstDown(k.getColour());
+                    k.setSecondDown(k.getSecondUp());
                 }
                 else
                 {
                     k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour());
+                    k.setFirstUp(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
+                    k.setSecondUp(k.getColour());
+                    k.setFirstDown(k.getFirstUp());
+                    k.setSecondDown(k.getColour());
                 }
-                Log.d(TAG, ropesUp.get(i+1) + " " + i + " " + currentScheme.getRopeUp().get(ropesUp.get(i)).getColour() + " " + currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour() + " " + k.getDirection());
+                //Log.d(TAG, ropesUp.get(i+1) + " " + i + " " + currentScheme.getRopeUp().get(ropesUp.get(i)).getColour() + " " + currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour() + " " + k.getDirection());
+
                 ropesDown.set(i,ropesUp.get(i));
                 ropesDown.set(i+1,ropesUp.get(i+1));
             }

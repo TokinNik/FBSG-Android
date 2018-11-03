@@ -16,6 +16,10 @@ public class Knot
 
     private KnotDirection direction;
     private int colour;
+    private int firstUp;
+    private int secondUp;
+    private int firstDown;
+    private int secondDown;
 
     Knot()
     {
@@ -57,5 +61,37 @@ public class Knot
 
     public void setColour(int colour) {
         this.colour = colour;
+    }
+
+    public int getFirstUp() {
+        return firstUp;
+    }
+
+    public void setFirstUp(int firstUp) {
+        this.firstUp = firstUp;
+    }
+
+    public int getSecondUp() {
+        return secondUp;
+    }
+
+    public void setSecondUp(int secondUp) {
+        this.secondUp = secondUp;
+    }
+
+    public int getFirstDown() {
+        return firstDown;
+    }
+
+    public void setFirstDown(int firstDown) {
+        this.firstDown = firstDown;
+    }
+
+    public int getSecondDown() {
+        return secondDown;
+    }
+
+    public void setSecondDown(int secondDown) {
+        this.secondDown = secondDown;
     }
 }

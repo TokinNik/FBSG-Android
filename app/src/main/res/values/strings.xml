@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">FBSG_Android</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="row_minus">-Ряд</string>
+    <string name="row_plus">+Ряд</string>
+    <string name="rope_plus">+Нить</string>
+    <string name="rope_minus">-Нить</string>
 </resources>

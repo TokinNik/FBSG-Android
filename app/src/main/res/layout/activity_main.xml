@@ -26,13 +26,46 @@
             android:layout_height="match_parent"
             android:layout_weight="2" />
 
-        <Button
-            android:id="@+id/button2"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text="Button"
-            android:visibility="visible" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_row_plus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="@string/row_plus"
+                android:visibility="visible"
+                tools:ignore="NestedWeights" />
+
+            <Button
+                android:id="@+id/button_row_minus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="@string/row_minus" />
+
+            <Button
+                android:id="@+id/button_rope_plus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="@string/rope_plus" />
+
+            <Button
+                android:id="@+id/button_rope_minus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="@string/rope_minus" />
+        </LinearLayout>
 
 
     </LinearLayout>
