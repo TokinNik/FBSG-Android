@@ -61,7 +61,7 @@ public class Row
                 i++;
                 continue;
             }
-            if (i + 1 == ropesUp.size())
+            if (i + 1 == ropesUp.size() || k.getDirection() == Knot.KnotDirection.RIGHT_EMPTY)
             {
                 ropesDown.set(i,ropesUp.get(i));
                 k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
@@ -89,7 +89,6 @@ public class Row
                     k.setFirstDown(k.getSecondUp());
                     k.setSecondDown(k.getColour());
                 }
-                //Log.d(TAG, ropesUp.get(i) + " " + ropesUp.get(i+1) + " " + i + " " + currentScheme.getRopeUp().get(ropesUp.get(i)).getColour() + " " + currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour()  + " " + k.getDirection());
 
                 int buf = ropesUp.get(i);
                 ropesDown.set(i, ropesUp.get(i+1));
@@ -105,7 +104,7 @@ public class Row
                     k.setFirstDown(k.getColour());
                     k.setSecondDown(k.getSecondUp());
                 }
-                else
+                else if (k.getDirection() == Knot.KnotDirection.RIGHT_ANGLE)
                 {
                     k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour());
                     k.setFirstUp(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
@@ -113,7 +112,6 @@ public class Row
                     k.setFirstDown(k.getFirstUp());
                     k.setSecondDown(k.getColour());
                 }
-                //Log.d(TAG, ropesUp.get(i+1) + " " + i + " " + currentScheme.getRopeUp().get(ropesUp.get(i)).getColour() + " " + currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour() + " " + k.getDirection());
 
                 ropesDown.set(i,ropesUp.get(i));
                 ropesDown.set(i+1,ropesUp.get(i+1));

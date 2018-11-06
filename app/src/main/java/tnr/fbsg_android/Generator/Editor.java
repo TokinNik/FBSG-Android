@@ -84,14 +84,14 @@ public class Editor
         scheme.getRopeDown().addAll(buf);
     }
 
-    public void decRope()
+    public boolean decRope()
     {
         isChanged = true;
         int preSize = scheme.getRopeUp().size()-1;
         if (preSize < 4)
         {
             System.out.println("!!! 4 Ropes is min to scheme !!!");
-            return;
+            return false;
         }
         scheme.getRopeUp().remove(preSize);
         scheme.getRopeDown().remove(preSize);
@@ -143,6 +143,7 @@ public class Editor
         }
         scheme.getRopeDown().clear();
         scheme.getRopeDown().addAll(buf);
+        return true;
     }
 
     public void addRow()
@@ -187,14 +188,14 @@ public class Editor
 
     }
 
-    public void decRow()
+    public boolean decRow()
     {
         isChanged = true;
         int rowSize = scheme.getRows().size()-1;
         if (rowSize < 2)
         {
             System.out.println("!!! 2 Rows is min to scheme !!!");
-            return;
+            return false;
         }
         scheme.getRows().remove(rowSize);
         rowSize --;
@@ -210,6 +211,7 @@ public class Editor
         }
         scheme.getRopeDown().clear();
         scheme.getRopeDown().addAll(buf);
+        return true;
     }
 
     public void changeRopeColor(int ropeId, int newColour)

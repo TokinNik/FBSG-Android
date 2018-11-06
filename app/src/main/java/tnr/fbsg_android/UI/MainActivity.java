@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import tnr.fbsg_android.Generator.Editor;
 import tnr.fbsg_android.Generator.Knot;
@@ -87,12 +88,11 @@ public class MainActivity extends AppCompatActivity
 
     public void onClick(View view)
     {
+        int i = 0;
         switch (view.getId())
         {
             case R.id.button_row_plus:
-                Log.d(TAG, "onClick +Row");
                 editor.addRow();
-                int i = 0;
                 for (Row row : currentScheme.getRows())
                 {
                     if (row.getId() < currentScheme.getRows().size() - 2)
@@ -104,9 +104,66 @@ public class MainActivity extends AppCompatActivity
                     }
                     i = 0;
                 }
+                schemeEditorView.reMathCoord();
                 schemeEditorView.invalidate();
-                schemeEditorView.invalidate();
+                break;
 
+            case R.id.button_row_minus:
+                if (!editor.decRow())
+                {
+                    Toast.makeText(this, R.string.minimal_amount_rows, Toast.LENGTH_SHORT).show();
+                    break;
+                }
+                i = currentScheme.getRows().get(0).getKnots().size() + (currentScheme.getRows().get(0).getType() == Row.RowType.OPEN_RIGHT ? currentScheme.getRows().get(0).getKnots().size() : currentScheme.getRows().get(1).getKnots().size());
+                while (i > 0)
+                {
+                    schemeEditorView.knotsDraw.remove(schemeEditorView.knotsDraw.size()-1);
+                    i--;
+                }
+                schemeEditorView.reMathCoord();
+                schemeEditorView.invalidate();
+                break;
+
+            case R.id.button_rope_plus:
+                editor.addRope();
+
+                schemeEditorView.knotsDraw.clear();//musorisch
+
+                for (Row row : currentScheme.getRows())
+                {
+                    for (Knot k : row.getKnots())
+                    {
+                        schemeEditorView.addKnot(new DrawKnot(k, row.getId(), i));
+                        i++;
+                    }
+                    i = 0;
+                }
+
+                schemeEditorView.reMathCoord();
+                schemeEditorView.invalidate();
+                break;
+
+            case R.id.button_rope_minus:
+                if (!editor.decRope())
+                {
+                    Toast.makeText(this, R.string.minimal_amount_ropes, Toast.LENGTH_SHORT).show();
+                    break;
+                }
+
+                schemeEditorView.knotsDraw.clear();//musorisch
+
+                for (Row row : currentScheme.getRows())
+                {
+                    for (Knot k : row.getKnots())
+                    {
+                        schemeEditorView.addKnot(new DrawKnot(k, row.getId(), i));
+                        i++;
+                    }
+                    i = 0;
+                }
+
+                schemeEditorView.reMathCoord();
+                schemeEditorView.invalidate();
                 break;
 
            default:

@@ -177,7 +177,7 @@ public class SchemeEditorView extends View
         {
             if (i%knotsRowSize == 0 && openRow)
                 buf++;
-            
+
             DrawKnot dk = knotsDraw.get(i);
             float x;
             float y;
@@ -277,6 +277,28 @@ public class SchemeEditorView extends View
 //            paint.setColor(editor.getScheme().getRopeUp().get(ropesDown.get(i)).getColour());
 //            canvas.drawCircle(posLeft + knotSize * i, posTop + 50, 10, paint);
 //        }
+    }
+
+    public void reMathCoord()
+    {
+        for (DrawKnot dk: knotsDraw)
+        {
+            float x;
+            float y;
+
+            if (dk.getRowId() % 2 == 0)
+            {
+                x = posLeft + (dk.getKnotId() * knotSize * 4);
+            } else
+            {
+                x = posLeft + (dk.getKnotId() * knotSize * 4 - knotSize * 2);
+            }
+
+            y = posTop + dk.getRowId() * knotSize * 4f;
+
+            dk.setX(x);
+            dk.setY(y);
+        }
     }
 
     private class MyGestureListener extends GestureDetector.SimpleOnGestureListener
