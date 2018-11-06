@@ -196,8 +196,9 @@ public class SchemeEditorView extends View
             dk.setX(x);
             dk.setY(y);
 
-            if (i < knotsDraw.size() - knotsRowSize - 1)
+            if (i < knotsDraw.size() - knotsRowSize - 1 )
             {
+                Log.d(TAG, String.valueOf(i));
                 paint.setStyle(Paint.Style.FILL_AND_STROKE);
                 paint.setStrokeWidth(10);
                 paint.setColor(dk.getKnot().getFirstDown());
@@ -209,6 +210,31 @@ public class SchemeEditorView extends View
                 if (dk.getKnot().getDirection() != Knot.KnotDirection.RIGHT_EMPTY)
                 {
                     canvas.drawLine(x, y, knotsDraw.get(i + 1 + knotsRowSize - (openRow ? (buf%2 == 1 ? 0 : 1) : 0)).getX(), knotsDraw.get(i + 1 + knotsRowSize - (openRow ? (buf%2 == 1 ? 0 : 1) : 0)).getY(), paint);
+                }
+            }
+            else
+            {
+                paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                paint.setStrokeWidth(10);
+                paint.setColor(dk.getKnot().getFirstDown());
+                if (dk.getKnot().getDirection() != Knot.KnotDirection.LEFT_EMPTY)
+                {
+                    if (dk.getRowId() == editor.getScheme().getRows().get(editor.getScheme().getRows().size()-2).getId())
+                    {
+                        canvas.drawLine(x, y, x + knotSize, y + knotSize * 8, paint);
+                        canvas.drawCircle(x + knotSize, y + knotSize * 8, knotSize / 2, paint);
+                    }
+                    else
+                    {
+                        canvas.drawLine(x, y, x - knotSize, y + knotSize * 4, paint);
+                        canvas.drawCircle(x - knotSize, y + knotSize*4, knotSize/2, paint);
+                    }
+                }
+                paint.setColor(dk.getKnot().getSecondDown());
+                if (dk.getKnot().getDirection() != Knot.KnotDirection.RIGHT_EMPTY)
+                {
+                    canvas.drawLine(x, y, x + knotSize, y + knotSize * 4, paint);
+                    canvas.drawCircle(x + knotSize, y + knotSize * 4, knotSize / 2, paint);
                 }
             }
 

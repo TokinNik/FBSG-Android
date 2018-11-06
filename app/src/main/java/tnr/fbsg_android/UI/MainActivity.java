@@ -46,8 +46,7 @@ public class MainActivity extends AppCompatActivity
         editor.addRope();
         editor.addRope();
         editor.addRow();
-        ConsoleSchemeViewer csv = new ConsoleSchemeViewer(currentScheme);
-        csv.viewScheme();
+        //ConsoleSchemeViewer csv = new ConsoleSchemeViewer(currentScheme);
         int i = 0;
         for (Row row : currentScheme.getRows())
         {
