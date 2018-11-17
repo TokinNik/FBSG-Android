@@ -61,18 +61,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         editor.changeRopeColor(3, Color.rgb(0, 0, 120));
         editor.changeRopeColor(4, Color.rgb(120, 120, 0));
         editor.changeRopeColor(5, Color.rgb(120, 0, 120));
-        editor.addRope();
-        editor.addRope();
-        editor.addRope();
-        editor.addRope();
-        editor.addRope();
-        editor.addRope();
-        editor.addRope();
-        editor.addRope();
-        editor.addRope();
-        editor.addRope();
-        editor.addRope();
-        editor.addRow();
         //ConsoleSchemeViewer csv = new ConsoleSchemeViewer(currentScheme);
         saveNum = "0";
 

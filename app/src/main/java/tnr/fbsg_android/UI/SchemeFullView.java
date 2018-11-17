@@ -6,8 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Rect;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -24,11 +22,11 @@ import tnr.fbsg_android.Generator.Editor;
 import tnr.fbsg_android.Generator.Knot;
 import tnr.fbsg_android.Generator.Rope;
 import tnr.fbsg_android.Generator.Row;
-import tnr.fbsg_android.R;
 
-public class SchemeEditorView extends View
+
+public class SchemeFullView extends View
 {
-    public static final String TAG = "SCHEME_GENERATOR_VIEW";
+    public static final String TAG = "SCHEME_FULL_VIEW";
     private final Paint paint = new Paint();
     BitmapFactory.Options options = new BitmapFactory.Options();
     private float posLeft;
@@ -46,23 +44,23 @@ public class SchemeEditorView extends View
     ArrayList<DrawKnot> knotsDraw;
     Editor editor;
 
-    public SchemeEditorView(Context context) {
+    public SchemeFullView(Context context) {
         super(context);
         init(context);
     }
 
-    public SchemeEditorView(Context context, @Nullable AttributeSet attrs) {
+    public SchemeFullView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
 
-    public SchemeEditorView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public SchemeFullView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public SchemeEditorView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public SchemeFullView(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context);
     }
@@ -70,7 +68,7 @@ public class SchemeEditorView extends View
     private  void init(Context context)
     {
         posLeftStart = 100;
-        posTopStart = 300;
+        posTopStart = 100;
         posLeft = posLeftStart;
         posTop = posTopStart;
         gestureDetector = new GestureDetector(context, new MyGestureListener());
@@ -296,10 +294,6 @@ public class SchemeEditorView extends View
             canvas.drawCircle(posLeft + knotSize * rope.getId() * 2 - 20, posTop - 50, 10, paint);
         }
 
-
-        //DrawFullScheme(canvas);//TODO оптимизировать!
-
-
 //        ArrayList<Integer> ropesDown = editor.getScheme().getRows().get(0).getRopesDown();
 //        for (int i = 0; i < ropesDown.size(); i++)
 //        {
@@ -331,49 +325,6 @@ public class SchemeEditorView extends View
         }
     }
 
-    private void DrawFullScheme(Canvas canvas)
-    {
-        Path rhombus = new Path();
-        int size = 20, size2 = size*2;
-        float x, y;
-        for (int i = 0; i < knotsDraw.size(); i++)
-        {
-            DrawKnot dk = knotsDraw.get(i);
-            if (dk.getKnot().getDirection() == Knot.KnotDirection.RIGHT_EMPTY || dk.getKnot().getDirection() == Knot.KnotDirection.LEFT_EMPTY)
-            {
-                continue;
-            }
-
-            x = posLeft - 50 + dk.getRowId() * size;
-
-            if (dk.getRowId()%2 == 0)
-            {
-                y = posTop - 100 - dk.getKnotId() * size2;
-            }
-            else
-            {
-                y = posTop - 100 - dk.getKnotId() * size2 + size;
-            }
-
-
-
-            rhombus.moveTo(x, y);
-            rhombus.lineTo(x + size, y + size);
-            rhombus.lineTo(x + size * 2, y);
-            rhombus.lineTo(x + size, y - size);
-            rhombus.lineTo(x, y);
-
-            paint.setStyle(Paint.Style.FILL);
-            paint.setStrokeWidth(1);
-            paint.setColor(dk.getKnot().getColour());
-            canvas.drawPath(rhombus, paint);
-
-            rhombus.reset();
-        }
-
-
-    }
-
     private class MyGestureListener extends GestureDetector.SimpleOnGestureListener
     {
         @Override
@@ -383,12 +334,6 @@ public class SchemeEditorView extends View
             posTop -= distanceY;
             invalidate();
             return true;
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
-        {
-            return super.onFling(e1, e2, velocityX, velocityY);
         }
 
         @Override
