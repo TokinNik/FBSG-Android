@@ -1,33 +1,51 @@
 package tnr.fbsg_android.UI;
 
+import android.app.Dialog;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import tnr.fbsg_android.Generator.Editor;
 import tnr.fbsg_android.Generator.Knot;
+import tnr.fbsg_android.Generator.Rope;
 import tnr.fbsg_android.Generator.Row;
 import tnr.fbsg_android.Generator.Scheme;
 import tnr.fbsg_android.R;
 import tnr.fbsg_android.SchemeViewer.ConsoleSchemeViewer;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener
 {
     public static final String TAG = "MAIN_AVTIVITY";
     private Scheme currentScheme;
     private Editor editor;
+    private String saveNum;
+    private Button saveButton;
     SchemeEditorView schemeEditorView;
+    private SeekBar seekBarRed;
+    private SeekBar seekBarGreen;
+    private SeekBar seekBarBlue;
+    private LinearLayout colPicker;
+    private View.OnClickListener colorButtonListerner;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
+    protected void onCreate(final Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -45,8 +63,19 @@ public class MainActivity extends AppCompatActivity
         editor.changeRopeColor(5, Color.rgb(120, 0, 120));
         editor.addRope();
         editor.addRope();
+        editor.addRope();
+        editor.addRope();
+        editor.addRope();
+        editor.addRope();
+        editor.addRope();
+        editor.addRope();
+        editor.addRope();
+        editor.addRope();
+        editor.addRope();
         editor.addRow();
         //ConsoleSchemeViewer csv = new ConsoleSchemeViewer(currentScheme);
+        saveNum = "0";
+
         int i = 0;
         for (Row row : currentScheme.getRows())
         {
@@ -81,6 +110,54 @@ public class MainActivity extends AppCompatActivity
             i = 0;
         }
 
+        colPicker = findViewById(R.id.layout_color_picker);
+        colorButtonListerner = new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                Button button = (Button) v;
+                if (saveNum.equals("0"))
+                {
+                    saveNum = (String) button.getText();
+                    saveButton = button;
+                    button.setText(R.string.ok);
+                    button.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 10));
+                    int color = ((ColorDrawable)button.getBackground()).getColor();
+                    Color.red(color);
+                    seekBarRed.setProgress(Color.red(color));
+                    seekBarGreen.setProgress(Color.green(color));
+                    seekBarBlue.setProgress(Color.blue(color));
+                    findViewById(R.id.layout_color_seek).setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                }
+                else if (button.getText().equals("Ok"))
+                {
+                    button.setLayoutParams(new LayoutParams(50, LayoutParams.WRAP_CONTENT, 0));
+                    button.setText(saveNum);
+                    saveNum = "0";
+                    findViewById(R.id.layout_color_seek).setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0));
+                }
+            }
+        };
+        for (Rope rope: currentScheme.getRopeUp())
+        {
+            addColorButton(rope);
+        }
+        saveButton = findViewById(0);
+
+        seekBarRed = findViewById(R.id.seekBar_color_red);
+        seekBarRed.getProgressDrawable().setColorFilter(Color.RED,PorterDuff.Mode.SRC_ATOP);
+        seekBarRed.getThumb().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+        seekBarRed.setOnSeekBarChangeListener(this);
+
+        seekBarGreen = findViewById(R.id.seekBar_color_green);
+        seekBarGreen.getProgressDrawable().setColorFilter(Color.GREEN,PorterDuff.Mode.SRC_ATOP);
+        seekBarGreen.getThumb().setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_ATOP);
+        seekBarGreen.setOnSeekBarChangeListener(this);
+
+        seekBarBlue = findViewById(R.id.seekBar_color_blue);
+        seekBarBlue.getProgressDrawable().setColorFilter(Color.BLUE,PorterDuff.Mode.SRC_ATOP);
+        seekBarBlue.getThumb().setColorFilter(Color.BLUE, PorterDuff.Mode.SRC_ATOP);
+        seekBarBlue.setOnSeekBarChangeListener(this);
 
     }
 
@@ -125,6 +202,7 @@ public class MainActivity extends AppCompatActivity
 
             case R.id.button_rope_plus:
                 editor.addRope();
+                addColorButton(currentScheme.getRopeUp().get(currentScheme.getRopeUp().size()-1));
 
                 schemeEditorView.knotsDraw.clear();//musorisch
 
@@ -149,6 +227,8 @@ public class MainActivity extends AppCompatActivity
                     break;
                 }
 
+                deleteColorButton(currentScheme.getRopeUp().size());
+
                 schemeEditorView.knotsDraw.clear();//musorisch
 
                 for (Row row : currentScheme.getRows())
@@ -169,5 +249,42 @@ public class MainActivity extends AppCompatActivity
                 break;
 
         }
+    }
+
+    private void addColorButton(Rope rope)
+    {
+        int i = rope.getId();
+        Button button = new Button(this);
+        button.setLayoutParams(new LayoutParams(50, LayoutParams.WRAP_CONTENT, 0));
+        button.setText(String.valueOf(i+1));
+        button.setBackgroundColor(rope.getColour());
+        button.setId(i);
+        button.setOnClickListener(colorButtonListerner);
+        colPicker.addView(button, i);
+    }
+    private void deleteColorButton(int index)
+    {
+        colPicker.removeViewAt(index);
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+    {
+        int color = Color.rgb(seekBarRed.getProgress(), seekBarGreen.getProgress(), seekBarBlue.getProgress());
+        saveButton.setBackgroundColor(color);
+        if (!saveNum.equals("0"))
+
+            editor.changeRopeColor(Integer.parseInt(saveNum)-1, color);
+        schemeEditorView.invalidate();
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
     }
 }

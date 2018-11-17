@@ -111,7 +111,7 @@ public class SchemeEditorView extends View
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
     {
-        Log.d(TAG, "pnMeasure()");
+        Log.d(TAG, "onMeasure()");
         int measuredWidth = MeasureSpec.getSize(widthMeasureSpec);
 
         if(maxWidth > 0 && maxWidth < measuredWidth)
@@ -198,7 +198,6 @@ public class SchemeEditorView extends View
 
             if (i < knotsDraw.size() - knotsRowSize - 1 )
             {
-                Log.d(TAG, String.valueOf(i));
                 paint.setStyle(Paint.Style.FILL_AND_STROKE);
                 paint.setStrokeWidth(10);
                 paint.setColor(dk.getKnot().getFirstDown());
@@ -221,8 +220,7 @@ public class SchemeEditorView extends View
                 {
                     if (dk.getRowId() == editor.getScheme().getRows().get(editor.getScheme().getRows().size()-2).getId())
                     {
-                        canvas.drawLine(x, y, x + knotSize, y + knotSize * 8, paint);
-                        canvas.drawCircle(x + knotSize, y + knotSize * 8, knotSize / 2, paint);
+                        canvas.drawLine(x, y, knotsDraw.get(i + knotsRowSize - (openRow ? (buf%2 == 1 ? 0 : 1) : 0)).getX(), knotsDraw.get(i + knotsRowSize - (openRow ? (buf%2 == 1 ? 0 : 1) : 0)).getY(), paint);
                     }
                     else
                     {
