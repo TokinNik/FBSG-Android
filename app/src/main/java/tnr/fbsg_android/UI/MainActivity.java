@@ -146,7 +146,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         seekBarBlue.getProgressDrawable().setColorFilter(Color.BLUE,PorterDuff.Mode.SRC_ATOP);
         seekBarBlue.getThumb().setColorFilter(Color.BLUE, PorterDuff.Mode.SRC_ATOP);
         seekBarBlue.setOnSeekBarChangeListener(this);
-
     }
 
 
@@ -232,7 +231,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 schemeEditorView.reMathCoord();
                 schemeEditorView.invalidate();
                 break;
-
+            case  R.id.button_save:
+                schemeEditorView.saveSignature();
+                schemeEditorView.saveSignature();//TODO kostil'
+                break;
            default:
                 break;
 

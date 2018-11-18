@@ -2,6 +2,7 @@ package tnr.fbsg_android.UI;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
@@ -17,7 +19,13 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 import tnr.fbsg_android.Generator.Editor;
@@ -297,7 +305,7 @@ public class SchemeEditorView extends View
         }
 
 
-        //DrawFullScheme(canvas);//TODO оптимизировать!
+        DrawFullScheme(canvas);//TODO оптимизировать!
 
 
 //        ArrayList<Integer> ropesDown = editor.getScheme().getRows().get(0).getRopesDown();
@@ -329,6 +337,42 @@ public class SchemeEditorView extends View
             dk.setX(x);
             dk.setY(y);
         }
+    }
+
+    public void saveSignature()
+    {
+        posLeft = posLeftStart;
+        posTop = posTopStart;
+        scaleFactor = 1.0f;
+        invalidate();
+        int border = 60;
+        int width = (int)(knotsDraw.get(knotsDraw.size()-1).getX() +  border);
+        int height = (int)(knotsDraw.get(knotsDraw.size()-1).getY() + border*2);
+
+        Bitmap  bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        this.draw(canvas);
+
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "scheme" + editor.getScheme().getId() + ".png");
+
+        try
+        {
+            FileOutputStream fos = null;
+            try
+            {
+                fos = new FileOutputStream(file);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            }
+            finally
+            {
+                if (fos != null) fos.close();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
     }
 
     private void DrawFullScheme(Canvas canvas)
