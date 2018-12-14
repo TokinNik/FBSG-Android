@@ -46,12 +46,144 @@ public class Scheme
         ropeDown.add(ropeUp.get(4));
     }
 
+    public Scheme(int id, int rowCount, int ropeCount, ArrayList<Rope> ropeUp, Scheme oldScheme)
+    {
+        this.name = "Name";
+        this.id = id;
+        this.ropeUp = ropeUp;
+        int i = 0;
+        for (Row row: oldScheme.getRows())
+        {
+            ArrayList<Knot> knots = new ArrayList<>();
+            for (Knot k: row.getKnots())
+            {
+                knots.add(new Knot(k.getDirection()));
+            }
+
+            rows.add(new Row(i, row.getRopesUp(), knots, row.getType(), this));
+        }
+        for (int j: rows.get(rowCount-1).getRopesDown())
+        {
+            if (j >= ropeUp.size())//TODO  K
+                continue;
+            ropeDown.add(ropeUp.get(j));
+        }
+    }
+
+    public Scheme(int id, int rowCount, int ropeCount, ArrayList<Rope> ropeUp)
+    {
+        this.name = "Name";
+        this.id = id;
+        this.ropeUp = ropeUp;
+        ArrayList<Integer> ropes = new ArrayList<>();
+        for (int i = 0; i < ropeCount; i++)
+        {
+            ropes.add(i);
+        }
+
+        for (int i = 0; i < rowCount; i++)
+        {
+            ArrayList<Knot> knots = new ArrayList<>();
+            if (ropeCount%2 == 0)
+            {
+                if (i%2 == 1)
+                {
+                    for (int j = 0; j < ropeCount; j++)
+                    {
+                        if (j == 0)
+                        {
+                            knots.add(new Knot(Knot.KnotDirection.LEFT_EMPTY));
+                        }
+                        else if (j == ropeCount-1)
+                        {
+                            knots.add(new Knot(Knot.KnotDirection.RIGHT_EMPTY));
+                        }
+                        else
+                        {
+                            knots.add(new Knot());
+                            j++;
+                        }
+                    }
+                    rows.add(new Row(i, ropes, knots, Row.RowType.NOT_FULL, this));
+                }
+                else
+                {
+                    for (int j = 0; j < ropeCount; j += 2)
+                    {
+                        knots.add(new Knot());
+                    }
+                    rows.add(new Row(i, ropes, knots, Row.RowType.FULL, this));
+                }
+            }
+            else
+            {
+                if (i%2 == 1)
+                {
+                    for (int j = 0; j < ropeCount; j++)
+                    {
+                        if (j == 0)
+                        {
+                            knots.add(new Knot(Knot.KnotDirection.LEFT_EMPTY));
+                        }
+                        else
+                        {
+                            knots.add(new Knot());
+                            j++;
+                        }
+                    }
+                    rows.add(new Row(i, ropes, knots, Row.RowType.OPEN_LEFT, this));
+                }
+                else
+                {
+                    for (int j = 0; j < ropeCount; j++)
+                    {
+                        if (j == ropeCount-1)
+                        {
+                            knots.add(new Knot(Knot.KnotDirection.RIGHT_EMPTY));
+                        }
+                        else
+                        {
+                            knots.add(new Knot());
+                        }
+                    }
+                    rows.add(new Row(i, ropes, knots, Row.RowType.OPEN_RIGHT, this));
+                }
+            }
+
+            ropes.clear();
+            ropes = (ArrayList<Integer>) rows.get(i).getRopesDown().clone();
+        }
+
+        for (int i: rows.get(rowCount-1).getRopesDown())
+        {
+            ropeDown.add(ropeUp.get(i));
+        }
+
+    }
+
     public Scheme(int id, ArrayList<Rope> ropeUp, ArrayList<Row> rows, ArrayList<Rope> ropeDown)
     {
+        this.name = "Name";
         this.id = id;
         this.ropeUp = ropeUp;
         this.rows = rows;
         this.ropeDown = ropeDown;
+    }
+
+    public void makeScheme()
+    {
+        ArrayList<Integer> ropes = new ArrayList<>();
+        for (Rope rope: ropeUp)
+        {
+            ropes.add(rope.getId());
+        }
+        for (Row row: rows)
+        {
+            row.setRopesUp(ropes);
+            row.makeRow();
+            ropes.clear();
+            ropes.addAll(row.getRopesDown());
+        }
     }
 
 

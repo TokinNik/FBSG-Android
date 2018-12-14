@@ -9,4 +9,5 @@
     <string name="minimal_amount_ropes">Достигнут минимум нитей</string>
     <string name="ok">Ok</string>
     <string name="save">Сохранить</string>
+    <string name="switch_mode">сменить режим</string>
 </resources>

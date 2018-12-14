@@ -1,6 +1,7 @@
 package tnr.fbsg_android.UI;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,7 +9,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -19,20 +19,18 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 import tnr.fbsg_android.Generator.Editor;
 import tnr.fbsg_android.Generator.Knot;
 import tnr.fbsg_android.Generator.Rope;
 import tnr.fbsg_android.Generator.Row;
+import tnr.fbsg_android.Generator.Scheme;
 import tnr.fbsg_android.R;
+import tnr.fbsg_android.SchemeViewer.ConsoleSchemeViewer;
 
 public class SchemeEditorView extends View
 {
@@ -47,6 +45,7 @@ public class SchemeEditorView extends View
     private float posTopStart;
     private float scaleFactor = 1.0f;
     private float knotSize = 25f;
+    private boolean imageMode = false;
     private GestureDetector gestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
     private int maxWidth = Integer.MAX_VALUE;
@@ -92,6 +91,12 @@ public class SchemeEditorView extends View
 
     public void setEditor(Editor editor) {
         this.editor = editor;
+    }
+    public void switchMode()
+    {
+        imageMode = !imageMode;
+        reMathCoord();
+        invalidate();
     }
 
     public void addKnot(ImageKnot imageKnot)
@@ -146,23 +151,24 @@ public class SchemeEditorView extends View
         super.onDraw(canvas);
 
         paint.setColor(Color.GRAY);
-
-        //
-        // if (scaleFactor >= 1) canvas.translate(0 - (getWidth() - getWidth()/scaleFactor), 0 - (getHeight() - getHeight()/scaleFactor));
-
         canvas.scale(scaleFactor, scaleFactor);
         canvas.drawColor(paint.getColor());
 
-        /*for (int i = 0; i < knotsImg.size(); i++)
+        if (imageMode)
         {
-            ImageKnot ik = knotsImg.get(i);
-            if (ik.getRowId()%2 == 0)
-                canvas.drawBitmap(ik.getImage(), posLeft + ik.getKnotId() * ik.getImage().getWidth() * 2 * scaleFactor,
-                        posTop + ik.getRowId() * ik.getImage().getHeight() * 1.5f * scaleFactor, null);
-            else
-                canvas.drawBitmap(ik.getImage(), posLeft + (ik.getKnotId() * ik.getImage().getWidth()*2 * scaleFactor - ik.getImage().getWidth()/2 * scaleFactor),
-                        posTop + ik.getRowId() * ik.getImage().getHeight() * 1.5f * scaleFactor, null);
-        }*/
+            for (int i = 0; i < knotsImg.size(); i++)
+            {
+                ImageKnot ik = knotsImg.get(i);
+                if (ik.getRowId() % 2 == 0)
+                    canvas.drawBitmap(ik.getImage(), posLeft + ik.getKnotId() * ik.getImage().getWidth() * 2 * scaleFactor,
+                            posTop + ik.getRowId() * ik.getImage().getHeight() * 1.5f * scaleFactor, null);
+                else
+                    canvas.drawBitmap(ik.getImage(), posLeft + (ik.getKnotId() * ik.getImage().getWidth() * 2 * scaleFactor - ik.getImage().getWidth() / 2 * scaleFactor),
+                            posTop + ik.getRowId() * ik.getImage().getHeight() * 1.5f * scaleFactor, null);
+            }
+        }
+        else
+        {
 
 
 //        paint.setStyle(Paint.Style.FILL_AND_STROKE);//заготовка прооисовки нитей
@@ -180,123 +186,119 @@ public class SchemeEditorView extends View
 //        }
 
 
-        int knotsRowSize =  editor.getScheme().getRows().get(0).getKnots().size();
-        boolean openRow = editor.getScheme().getRows().get(0).getType() == Row.RowType.OPEN_RIGHT;
-        int buf = 0;
-        for (int i = 0; i < knotsDraw.size(); i++)
-        {
-            if (i%knotsRowSize == 0 && openRow)
-                buf++;
-
-            DrawKnot dk = knotsDraw.get(i);
-            float x;
-            float y;
-
-            if (dk.getRowId()%2 == 0)
+            int knotsRowSize = editor.getScheme().getRows().get(0).getKnots().size();
+            boolean openRow = editor.getScheme().getRows().get(0).getType() == Row.RowType.OPEN_RIGHT;
+            int buf = 0;
+            for (int i = 0; i < knotsDraw.size(); i++)
             {
-                x = posLeft + (dk.getKnotId() * knotSize * 4);
-            }
-            else
-            {
-                x = posLeft + (dk.getKnotId() * knotSize * 4 - knotSize * 2);
-            }
+                if (i % knotsRowSize == 0 && openRow)
+                    buf++;
 
-            y = posTop + dk.getRowId() * knotSize * 4f;
+                DrawKnot dk = knotsDraw.get(i);
+                float x;
+                float y;
 
-            dk.setX(x);
-            dk.setY(y);
-
-            if (i < knotsDraw.size() - knotsRowSize - 1 )
-            {
-                paint.setStyle(Paint.Style.FILL_AND_STROKE);
-                paint.setStrokeWidth(10);
-                paint.setColor(dk.getKnot().getFirstDown());
-                if (dk.getKnot().getDirection() != Knot.KnotDirection.LEFT_EMPTY)
+                if (dk.getRowId() % 2 == 0)
                 {
-                    canvas.drawLine(x, y, knotsDraw.get(i + knotsRowSize - (openRow ? (buf%2 == 1 ? 0 : 1) : 0)).getX(), knotsDraw.get(i + knotsRowSize - (openRow ? (buf%2 == 1 ? 0 : 1) : 0)).getY(), paint);
+                    x = posLeft + (dk.getKnotId() * knotSize * 4);
+                } else
+                {
+                    x = posLeft + (dk.getKnotId() * knotSize * 4 - knotSize * 2);
                 }
-                paint.setColor(dk.getKnot().getSecondDown());
-                if (dk.getKnot().getDirection() != Knot.KnotDirection.RIGHT_EMPTY)
+
+                y = posTop + dk.getRowId() * knotSize * 4f;
+
+                dk.setX(x);
+                dk.setY(y);
+
+                if (i < knotsDraw.size() - knotsRowSize - 1)
                 {
-                    canvas.drawLine(x, y, knotsDraw.get(i + 1 + knotsRowSize - (openRow ? (buf%2 == 1 ? 0 : 1) : 0)).getX(), knotsDraw.get(i + 1 + knotsRowSize - (openRow ? (buf%2 == 1 ? 0 : 1) : 0)).getY(), paint);
-                }
-            }
-            else
-            {
-                paint.setStyle(Paint.Style.FILL_AND_STROKE);
-                paint.setStrokeWidth(10);
-                paint.setColor(dk.getKnot().getFirstDown());
-                if (dk.getKnot().getDirection() != Knot.KnotDirection.LEFT_EMPTY)
-                {
-                    if (dk.getRowId() == editor.getScheme().getRows().get(editor.getScheme().getRows().size()-2).getId())
+                    paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                    paint.setStrokeWidth(10);
+                    paint.setColor(dk.getKnot().getFirstDown());
+                    if (dk.getKnot().getDirection() != Knot.KnotDirection.LEFT_EMPTY)
                     {
-                        canvas.drawLine(x, y, knotsDraw.get(i + knotsRowSize - (openRow ? (buf%2 == 1 ? 0 : 1) : 0)).getX(), knotsDraw.get(i + knotsRowSize - (openRow ? (buf%2 == 1 ? 0 : 1) : 0)).getY(), paint);
+                        canvas.drawLine(x, y, knotsDraw.get(i + knotsRowSize - (openRow ? (buf % 2 == 1 ? 0 : 1) : 0)).getX(), knotsDraw.get(i + knotsRowSize - (openRow ? (buf % 2 == 1 ? 0 : 1) : 0)).getY(), paint);
                     }
-                    else
+                    paint.setColor(dk.getKnot().getSecondDown());
+                    if (dk.getKnot().getDirection() != Knot.KnotDirection.RIGHT_EMPTY)
                     {
-                        canvas.drawLine(x, y, x - knotSize, y + knotSize * 4, paint);
-                        canvas.drawCircle(x - knotSize, y + knotSize*4, knotSize/2, paint);
+                        canvas.drawLine(x, y, knotsDraw.get(i + 1 + knotsRowSize - (openRow ? (buf % 2 == 1 ? 0 : 1) : 0)).getX(), knotsDraw.get(i + 1 + knotsRowSize - (openRow ? (buf % 2 == 1 ? 0 : 1) : 0)).getY(), paint);
+                    }
+                } else
+                {
+                    paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                    paint.setStrokeWidth(10);
+                    paint.setColor(dk.getKnot().getFirstDown());
+                    if (dk.getKnot().getDirection() != Knot.KnotDirection.LEFT_EMPTY)
+                    {
+                        if (dk.getRowId() == editor.getScheme().getRows().get(editor.getScheme().getRows().size() - 2).getId())
+                        {
+                            canvas.drawLine(x, y, knotsDraw.get(i + knotsRowSize - (openRow ? (buf % 2 == 1 ? 0 : 1) : 0)).getX(), knotsDraw.get(i + knotsRowSize - (openRow ? (buf % 2 == 1 ? 0 : 1) : 0)).getY(), paint);
+                        } else
+                        {
+                            canvas.drawLine(x, y, x - knotSize, y + knotSize * 4, paint);
+                            canvas.drawCircle(x - knotSize, y + knotSize * 4, knotSize / 2, paint);
+                        }
+                    }
+                    paint.setColor(dk.getKnot().getSecondDown());
+                    if (dk.getKnot().getDirection() != Knot.KnotDirection.RIGHT_EMPTY)
+                    {
+                        canvas.drawLine(x, y, x + knotSize, y + knotSize * 4, paint);
+                        canvas.drawCircle(x + knotSize, y + knotSize * 4, knotSize / 2, paint);
                     }
                 }
-                paint.setColor(dk.getKnot().getSecondDown());
-                if (dk.getKnot().getDirection() != Knot.KnotDirection.RIGHT_EMPTY)
+
+                if (dk.getKnot().getDirection() != Knot.KnotDirection.LEFT_EMPTY && dk.getKnot().getDirection() != Knot.KnotDirection.RIGHT_EMPTY)
                 {
-                    canvas.drawLine(x, y, x + knotSize, y + knotSize * 4, paint);
-                    canvas.drawCircle(x + knotSize, y + knotSize * 4, knotSize / 2, paint);
+                    paint.setStyle(Paint.Style.FILL);
+                    paint.setColor(dk.getKnot().getColour());
+                    paint.setStrokeWidth(1);
+                    canvas.drawCircle(x, y, knotSize, paint);
+
+                    paint.setStyle(Paint.Style.STROKE);
+                    paint.setColor(Color.BLACK);
+                    paint.setStrokeWidth(2);
+                    canvas.drawCircle(x, y, knotSize, paint);
+                } else
+                {
+                    paint.setStyle(Paint.Style.FILL);
+                    paint.setColor(dk.getKnot().getColour());
+                    paint.setStrokeWidth(1);
+                    canvas.drawCircle(x, y, knotSize / 3, paint);
                 }
-            }
 
-            if (dk.getKnot().getDirection() != Knot.KnotDirection.LEFT_EMPTY && dk.getKnot().getDirection() != Knot.KnotDirection.RIGHT_EMPTY)
-            {
-                paint.setStyle(Paint.Style.FILL);
-                paint.setColor(dk.getKnot().getColour());
-                paint.setStrokeWidth(1);
-                canvas.drawCircle(x, y, knotSize, paint);
+                float shift = knotSize * 0.6f;
 
-                paint.setStyle(Paint.Style.STROKE);
-                paint.setColor(Color.BLACK);
-                paint.setStrokeWidth(2);
-                canvas.drawCircle(x, y, knotSize, paint);
-            }
-            else
-            {
-                paint.setStyle(Paint.Style.FILL);
-                paint.setColor(dk.getKnot().getColour());
-                paint.setStrokeWidth(1);
-                canvas.drawCircle(x, y, knotSize/3, paint);
-            }
-
-            float shift = knotSize * 0.6f;
-
-            switch (dk.getKnot().getDirection())
-            {
-                case LEFT:
-                    canvas.drawLine(x - shift, y + shift, x + shift, y - shift, paint);
-                    canvas.drawLine(x - shift, y + shift, x - shift, y, paint);
-                    canvas.drawLine(x - shift, y + shift, x, y + shift, paint);
-                    break;
-                case RIGHT:
-                    canvas.drawLine(x + shift, y + shift, x - shift, y - shift, paint);
-                    canvas.drawLine(x + shift, y + shift, x + shift, y, paint);
-                    canvas.drawLine(x + shift, y + shift, x, y + shift, paint);
-                    break;
-                case LEFT_ANGLE:
-                    canvas.drawLine(x - shift, y + shift, x, y, paint);
-                    canvas.drawLine(x, y, x - shift, y - shift, paint);
-                    canvas.drawLine(x - shift, y + shift, x - shift, y, paint);
-                    canvas.drawLine(x - shift, y + shift, x, y + shift, paint);
-                    break;
-                case RIGHT_ANGLE:
-                    canvas.drawLine(x + shift, y + shift, x , y , paint);
-                    canvas.drawLine(x, y, x + shift , y - shift , paint);
-                    canvas.drawLine(x + shift, y + shift, x + shift, y, paint);
-                    canvas.drawLine(x + shift, y + shift, x, y + shift, paint);
-                    break;
-                default:
-                    break;
+                switch (dk.getKnot().getDirection())
+                {
+                    case LEFT:
+                        canvas.drawLine(x - shift, y + shift, x + shift, y - shift, paint);
+                        canvas.drawLine(x - shift, y + shift, x - shift, y, paint);
+                        canvas.drawLine(x - shift, y + shift, x, y + shift, paint);
+                        break;
+                    case RIGHT:
+                        canvas.drawLine(x + shift, y + shift, x - shift, y - shift, paint);
+                        canvas.drawLine(x + shift, y + shift, x + shift, y, paint);
+                        canvas.drawLine(x + shift, y + shift, x, y + shift, paint);
+                        break;
+                    case LEFT_ANGLE:
+                        canvas.drawLine(x - shift, y + shift, x, y, paint);
+                        canvas.drawLine(x, y, x - shift, y - shift, paint);
+                        canvas.drawLine(x - shift, y + shift, x - shift, y, paint);
+                        canvas.drawLine(x - shift, y + shift, x, y + shift, paint);
+                        break;
+                    case RIGHT_ANGLE:
+                        canvas.drawLine(x + shift, y + shift, x, y, paint);
+                        canvas.drawLine(x, y, x + shift, y - shift, paint);
+                        canvas.drawLine(x + shift, y + shift, x + shift, y, paint);
+                        canvas.drawLine(x + shift, y + shift, x, y + shift, paint);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
-
         for (Rope rope: editor.getScheme().getRopeUp())
         {
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -305,7 +307,9 @@ public class SchemeEditorView extends View
         }
 
 
-        DrawFullScheme(canvas);//TODO оптимизировать!
+
+        //DrawFullScheme(canvas);//TODO оптимизировать!
+        drawFullSchemeBeta(canvas);
 
 
 //        ArrayList<Integer> ropesDown = editor.getScheme().getRows().get(0).getRopesDown();
@@ -379,7 +383,8 @@ public class SchemeEditorView extends View
     {
         Path rhombus = new Path();
         int size = 20, size2 = size*2;
-        float x, y;
+        float x, y, buf = 0;
+        boolean repeat = false;
         for (int i = 0; i < knotsDraw.size(); i++)
         {
             DrawKnot dk = knotsDraw.get(i);
@@ -388,7 +393,7 @@ public class SchemeEditorView extends View
                 continue;
             }
 
-            x = posLeft - 50 + dk.getRowId() * size;
+            x = posLeft - 50 + (dk.getRowId() + (repeat ? buf : 0)) * size;
 
             if (dk.getRowId()%2 == 0)
             {
@@ -413,9 +418,75 @@ public class SchemeEditorView extends View
             canvas.drawPath(rhombus, paint);
 
             rhombus.reset();
+
+            /*if (i+1 == knotsDraw.size() && x < dk.getX())
+                {
+                    buf = buf + dk.getRowId() + 1;
+                    i = 0;
+                    repeat = true;
+                }*/
         }
+    }
 
+    private void drawFullSchemeBeta(Canvas canvas)
+    {
+        Path rhombus = new Path();
+        int size = 20, size2 = size*2, i = 0, buf = 0;
+        float x = 0, y = 0, borderX = knotsDraw.get(knotsDraw.size()-1).getX();
+        Scheme shem = editor.getScheme();
+        while (x < borderX)
+        {
+            Row row = shem.getRows().get(i);
+            int j = 0;
+            x = posLeft - 50 + buf * size;
 
+            for (Knot k: row.getKnots())
+            {
+                if (k.getDirection() == Knot.KnotDirection.RIGHT_EMPTY || k.getDirection() == Knot.KnotDirection.LEFT_EMPTY)
+                {
+                    continue;
+                }
+
+                if (buf%2 == 0)
+                {
+                    y = posTop - 100 - j * size2;
+                }
+                else
+                {
+                    y = posTop - 100 - j * size2 - size;
+                }
+
+                Log.d(TAG, "XX = " + x + " YY = " + y + " Knot Dir = " + k.getDirection());
+
+                rhombus.moveTo(x, y);
+                rhombus.lineTo(x + size, y + size);
+                rhombus.lineTo(x + size * 2, y);
+                rhombus.lineTo(x + size, y - size);
+                rhombus.lineTo(x, y);
+
+                paint.setStyle(Paint.Style.FILL);
+                paint.setStrokeWidth(1);
+                paint.setColor(k.getColour());
+                canvas.drawPath(rhombus, paint);
+
+                rhombus.reset();
+                j++;
+            }
+
+            Log.d(TAG, "X = " + x + " BUF = " + buf + " BORDER = " + borderX + " Knots count = " + row.getKnots().size() + " i = " + i);
+
+            i++;
+            buf++;
+            if (i == shem.getRows().size())
+            {
+                i = 0;
+                //shem.makeScheme();
+                //ConsoleSchemeViewer consoleSchemeViewer = new ConsoleSchemeViewer(shem);
+                //consoleSchemeViewer.viewScheme();
+                shem = new Scheme(buf, shem.getRows().size(), shem.getRopeDown().size(), shem.getRopeDown(), shem);
+                //consoleSchemeViewer.viewScheme();
+            }
+        }
     }
 
     private class MyGestureListener extends GestureDetector.SimpleOnGestureListener
@@ -423,9 +494,9 @@ public class SchemeEditorView extends View
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY)
         {
-            posLeft -= distanceX;
-            posTop -= distanceY;
-            invalidate();
+            //posLeft -= distanceX;//TODO ljhf,jnfnm
+            //posTop -= distanceY;
+            //invalidate();
             return true;
         }
 
@@ -438,7 +509,7 @@ public class SchemeEditorView extends View
         @Override
         public boolean onDoubleTap(MotionEvent e)
         {
-            scaleFactor = 1.0f;//TODO убрать на релизе
+            //scaleFactor = 1.0f;//TODO убрать на релизе
             invalidate();
             return true;
         }
@@ -448,84 +519,85 @@ public class SchemeEditorView extends View
         {
             float pointX = e.getX();
             float pointY = e.getY();
-/*
-            for (ImageKnot ik: knotsImg)
+            if (imageMode)
             {
-                float y = posTop + ik.getRowId() * ik.getImage().getHeight() * 1.5f;
-                if (ik.getRowId()%2 == 0)
+                for (ImageKnot ik : knotsImg)
                 {
-                    float x = posLeft + ik.getKnotId() * ik.getImage().getWidth() * 2 * scaleFactor;
-                    if (pointX >= x && pointX  <= x + ik.getImage().getWidth() &&
-                            pointY >= y && pointY <= y + ik.getImage().getHeight())
+                    float y = posTop + ik.getRowId() * ik.getImage().getHeight() * 1.5f;
+                    editor.changeKnotDirection(ik.getKnot(), null);
+                    if (ik.getRowId() % 2 == 0)
                     {
-                        ik.getKnot().changeDirection();
-                        switch (ik.getKnot().getDirection())
+                        float x = posLeft + ik.getKnotId() * ik.getImage().getWidth() * 2 * scaleFactor;
+                        if (pointX >= x && pointX <= x + ik.getImage().getWidth() &&
+                                pointY >= y && pointY <= y + ik.getImage().getHeight())
                         {
-                            case LEFT:
-                                ik.setImage( BitmapFactory.decodeResource(getResources(),R.drawable.red_box_left, options));
-                                invalidate();
-                                break;
-                            case RIGHT:
-                                ik.setImage( BitmapFactory.decodeResource(getResources(),R.drawable.red_box_right, options));
-                                invalidate();
-                                break;
-                            case RIGHT_ANGLE:
-                                ik.setImage( BitmapFactory.decodeResource(getResources(),R.drawable.red_box_right_angle, options));
-                                invalidate();
-                                break;
-                            case LEFT_ANGLE:
-                                ik.setImage( BitmapFactory.decodeResource(getResources(),R.drawable.red_box_left_angle, options));
-                                invalidate();
-                                break;
-                            default:
+                            switch (ik.getKnot().getDirection())
+                            {
+                                case LEFT:
+                                    ik.setImage(BitmapFactory.decodeResource(getResources(), R.drawable.red_box_left_25, options));
+                                    invalidate();
                                     break;
-                             }
-                             break;
+                                case RIGHT:
+                                    ik.setImage(BitmapFactory.decodeResource(getResources(), R.drawable.red_box_right_25, options));
+                                    invalidate();
+                                    break;
+                                case RIGHT_ANGLE:
+                                    ik.setImage(BitmapFactory.decodeResource(getResources(), R.drawable.red_box_right_angle_25, options));
+                                    invalidate();
+                                    break;
+                                case LEFT_ANGLE:
+                                    ik.setImage(BitmapFactory.decodeResource(getResources(), R.drawable.red_box_left_angle_25, options));
+                                    invalidate();
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        }
+                    } else
+                    {
+                        float x = posLeft + (ik.getKnotId() * ik.getImage().getWidth() * 2 * scaleFactor - ik.getImage().getWidth() / 2 * scaleFactor);
+                        if (pointX >= x && pointX <= x + ik.getImage().getWidth() &&
+                                pointY >= y && pointY <= y + ik.getImage().getHeight())
+                        {
+                            switch (ik.getKnot().getDirection())
+                            {
+                                case LEFT:
+                                    ik.setImage(BitmapFactory.decodeResource(getResources(), R.drawable.red_box_left_25, options));
+                                    invalidate();
+                                    break;
+                                case RIGHT:
+                                    ik.setImage(BitmapFactory.decodeResource(getResources(), R.drawable.red_box_right_25, options));
+                                    invalidate();
+                                    break;
+                                case RIGHT_ANGLE:
+                                    ik.setImage(BitmapFactory.decodeResource(getResources(), R.drawable.red_box_right_angle_25, options));
+                                    invalidate();
+                                    break;
+                                case LEFT_ANGLE:
+                                    ik.setImage(BitmapFactory.decodeResource(getResources(), R.drawable.red_box_left_angle_25, options));
+                                    invalidate();
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        }
                     }
                 }
-                else
+            }
+            else
+            {
+                for (DrawKnot dk : knotsDraw)
                 {
-                    float x = posLeft + (ik.getKnotId() * ik.getImage().getWidth() * 2 * scaleFactor - ik.getImage().getWidth()/2 * scaleFactor);
-                    if (pointX >= x && pointX  <= x + ik.getImage().getWidth() &&
-                            pointY >= y && pointY <= y + ik.getImage().getHeight())
+                    if (Math.pow(pointX - dk.getX(), 2) + Math.pow(pointY - dk.getY(), 2) <= Math.pow(knotSize, 2))
                     {
-                        ik.getKnot().changeDirection();
-                        switch (ik.getKnot().getDirection())
-                        {
-                            case LEFT:
-                                ik.setImage( BitmapFactory.decodeResource(getResources(),R.drawable.red_box_left, options));
-                                invalidate();
-                                break;
-                            case RIGHT:
-                                ik.setImage( BitmapFactory.decodeResource(getResources(),R.drawable.red_box_right, options));
-                                invalidate();
-                                break;
-                            case RIGHT_ANGLE:
-                                ik.setImage( BitmapFactory.decodeResource(getResources(),R.drawable.red_box_right_angle, options));
-                                invalidate();
-                                break;
-                            case LEFT_ANGLE:
-                                ik.setImage( BitmapFactory.decodeResource(getResources(),R.drawable.red_box_left_angle, options));
-                                invalidate();
-                                break;
-                            default:
-                                break;
-                        }
+                        editor.changeKnotDirection(dk.getKnot(), null);
+                        invalidate();
                         break;
                     }
                 }
             }
-*/
-            for (DrawKnot dk: knotsDraw)
-            {
-                if (Math.pow(pointX - dk.getX(), 2) + Math.pow(pointY - dk.getY(), 2) <= Math.pow(knotSize, 2))
-                {
-                    editor.changeKnotDirection(dk.getKnot(), null);
-                    invalidate();
-                    break;
-                }
-            }
-
             return super.onSingleTapUp(e);
         }
     }

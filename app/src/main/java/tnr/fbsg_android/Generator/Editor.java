@@ -1,11 +1,13 @@
 package tnr.fbsg_android.Generator;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.ArrayList;
 
 public class Editor
 {
+    public static final String TAG = "EDITOR";
     private Scheme scheme;
     private boolean isChanged = false;
 
@@ -70,7 +72,7 @@ public class Editor
             }
             row.setRopesUp(ropesUp);
             row.setRopesDown(ropesUp);
-            row.makeRow(scheme);
+            row.makeRow();
             i++;
         }
         ArrayList<Rope> buf1 = scheme.getRopeUp();
@@ -131,7 +133,7 @@ public class Editor
             }
             row.setRopesUp(ropesUp);
             row.setRopesDown(ropesUp);
-            row.makeRow(scheme);
+            row.makeRow();
             i++;
         }
         ArrayList<Rope> buf1 = scheme.getRopeUp();
@@ -259,7 +261,7 @@ public class Editor
             }
             row.setRopesUp(ropesUp);
             row.setRopesDown(ropesUp);
-            row.makeRow(scheme);
+            row.makeRow();
             i++;
         }
     }

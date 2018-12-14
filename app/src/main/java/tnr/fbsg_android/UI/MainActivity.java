@@ -1,6 +1,8 @@
 package tnr.fbsg_android.UI;
 
 import android.app.Dialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -53,7 +55,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inMutable = true;
         Resources resources = getResources();
-        currentScheme = new Scheme(0);
+        SharedPreferences preferences = getSharedPreferences("settings", Context.MODE_PRIVATE);
+        currentScheme = new Scheme(preferences.getInt("next_sheme_id", 0));
         editor = new Editor(currentScheme);
         schemeEditorView.setEditor(editor);
         editor.changeRopeColor(1, Color.rgb(120, 0, 0));
@@ -72,22 +75,22 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 switch (k.getDirection())
                 {
                     case LEFT:
-                        schemeEditorView.addKnot(new ImageKnot(k, BitmapFactory.decodeResource(resources, R.drawable.red_box_left, options), row.getId(), i));
+                        schemeEditorView.addKnot(new ImageKnot(k, BitmapFactory.decodeResource(resources, R.drawable.red_box_left_25, options), row.getId(), i));
                         break;
                     case RIGHT:
-                        schemeEditorView.addKnot(new ImageKnot(k, BitmapFactory.decodeResource(resources, R.drawable.red_box_right, options), row.getId(), i));
+                        schemeEditorView.addKnot(new ImageKnot(k, BitmapFactory.decodeResource(resources, R.drawable.red_box_right_25, options), row.getId(), i));
                         break;
                     case RIGHT_ANGLE:
-                        schemeEditorView.addKnot(new ImageKnot(k, BitmapFactory.decodeResource(resources, R.drawable.red_box_right_angle, options), row.getId(), i));
+                        schemeEditorView.addKnot(new ImageKnot(k, BitmapFactory.decodeResource(resources, R.drawable.red_box_right_angle_25, options), row.getId(), i));
                         break;
                     case LEFT_ANGLE:
-                        schemeEditorView.addKnot(new ImageKnot(k, BitmapFactory.decodeResource(resources, R.drawable.red_box_left_angle, options), row.getId(), i));
+                        schemeEditorView.addKnot(new ImageKnot(k, BitmapFactory.decodeResource(resources, R.drawable.red_box_left_angle_25, options), row.getId(), i));
                         break;
                     case RIGHT_EMPTY:
-                        schemeEditorView.addKnot(new ImageKnot(k, BitmapFactory.decodeResource(resources, R.drawable.red_box_right_empty, options), row.getId(), i));
+                        schemeEditorView.addKnot(new ImageKnot(k, BitmapFactory.decodeResource(resources, R.drawable.red_box_right_empty_25, options), row.getId(), i));
                         break;
                     case LEFT_EMPTY:
-                        schemeEditorView.addKnot(new ImageKnot(k, BitmapFactory.decodeResource(resources, R.drawable.red_box_left_empty, options), row.getId(), i));
+                        schemeEditorView.addKnot(new ImageKnot(k, BitmapFactory.decodeResource(resources, R.drawable.red_box_left_empty_25, options), row.getId(), i));
                         break;
                     default:
                         break;
@@ -233,8 +236,17 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 break;
             case  R.id.button_save:
                 schemeEditorView.saveSignature();
-                schemeEditorView.saveSignature();//TODO kostil'
+                schemeEditorView.saveSignature();//TODO K
+                int id = currentScheme.getId();
+                Toast.makeText(this, "Схеме сохранена в /stortage/emulated/0/Pictures/scheme" + id + ".png", Toast.LENGTH_LONG).show();
+                SharedPreferences preferences = getSharedPreferences("settings", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("next_sheme_id", id+1);
+                editor.apply();
+                currentScheme.setId(id+1);
                 break;
+            //case R.id.button_switch_mode:
+                //schemeEditorView.switchMode();
            default:
                 break;
 

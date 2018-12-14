@@ -339,7 +339,7 @@ public class SchemeFullView extends View
         @Override
         public boolean onDoubleTap(MotionEvent e)
         {
-            scaleFactor = 1.0f;//TODO убрать на релизе
+            //scaleFactor = 1.0f;//TODO убрать на релизе
             invalidate();
             return true;
         }

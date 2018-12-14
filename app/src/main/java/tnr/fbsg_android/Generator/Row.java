@@ -1,9 +1,5 @@
 package tnr.fbsg_android.Generator;
 
-import android.graphics.Color;
-import android.support.annotation.Nullable;
-import android.util.Log;
-
 import java.util.ArrayList;
 
 public class Row
@@ -22,7 +18,7 @@ public class Row
     private ArrayList<Integer> ropesUp = new ArrayList<>();
     private ArrayList<Integer> ropesDown = new ArrayList<>();
     private int id;
-    private final Scheme currentScheme;
+    private Scheme currentScheme;
 
     Row(int id, ArrayList<Integer> ropesUp, ArrayList<Knot> knots, ArrayList<Integer> ropesDown, Scheme scheme, RowType type)
     {
@@ -42,84 +38,81 @@ public class Row
     this.ropesDown.addAll(ropesUp);
     this.type = type;
     this.currentScheme = scheme;
-    makeRow(currentScheme);
+    makeRow();
 }
 
-    public void makeRow(@Nullable Scheme scheme )
+    public void makeRow()
     {
-        int i = 0;
+        int i = 0, buf;
         for (Knot k:knots)
         {
-            if (k.getDirection() == Knot.KnotDirection.LEFT_EMPTY)
+            switch (k.getDirection())
             {
-                ropesDown.set(i,ropesUp.get(i));
-                k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
-                k.setFirstUp(k.getColour());
-                k.setSecondUp(k.getColour());
-                k.setFirstDown(k.getColour());
-                k.setSecondDown(k.getColour());
-                i++;
-                continue;
-            }
-            if (i + 1 == ropesUp.size() || k.getDirection() == Knot.KnotDirection.RIGHT_EMPTY)
-            {
-                ropesDown.set(i,ropesUp.get(i));
-                k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
-                k.setFirstUp(k.getColour());
-                k.setSecondUp(k.getColour());
-                k.setFirstDown(k.getColour());
-                k.setSecondDown(k.getColour());
-                break;
-            }
-            if (k.getDirection() == Knot.KnotDirection.RIGHT || k.getDirection() == Knot.KnotDirection.LEFT)
-            {
-                if (k.getDirection() == Knot.KnotDirection.LEFT)
-                {
+                case LEFT:
                     k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour());
                     k.setFirstUp(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
                     k.setSecondUp(k.getColour());
                     k.setFirstDown(k.getColour());
                     k.setSecondDown(k.getFirstUp());
-                }
-                else
-                {
+                    buf = ropesUp.get(i);
+                    ropesDown.set(i, ropesUp.get(i+1));
+                    ropesDown.set(i+1, buf);
+                    i += 2;
+                    break;
+                case RIGHT:
                     k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
                     k.setFirstUp(k.getColour());
                     k.setSecondUp((currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour()));
                     k.setFirstDown(k.getSecondUp());
                     k.setSecondDown(k.getColour());
-                }
-
-                int buf = ropesUp.get(i);
-                ropesDown.set(i, ropesUp.get(i+1));
-                ropesDown.set(i+1, buf);
-            }
-            else
-            {
-                if (k.getDirection() == Knot.KnotDirection.LEFT_ANGLE)
-                {
-                    k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
-                    k.setFirstUp(k.getColour());
-                    k.setSecondUp(currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour());
-                    k.setFirstDown(k.getColour());
-                    k.setSecondDown(k.getSecondUp());
-                }
-                else if (k.getDirection() == Knot.KnotDirection.RIGHT_ANGLE)
-                {
+                    buf = ropesUp.get(i);
+                    ropesDown.set(i, ropesUp.get(i+1));
+                    ropesDown.set(i+1, buf);
+                    i += 2;
+                    break;
+                case RIGHT_ANGLE:
                     k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour());
                     k.setFirstUp(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
                     k.setSecondUp(k.getColour());
                     k.setFirstDown(k.getFirstUp());
                     k.setSecondDown(k.getColour());
-                }
-
-                ropesDown.set(i,ropesUp.get(i));
-                ropesDown.set(i+1,ropesUp.get(i+1));
+                    ropesDown.set(i,ropesUp.get(i));
+                    ropesDown.set(i+1,ropesUp.get(i+1));
+                    i += 2;
+                    break;
+                case LEFT_ANGLE:
+                    k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
+                    k.setFirstUp(k.getColour());
+                    k.setSecondUp(currentScheme.getRopeUp().get(ropesUp.get(i+1)).getColour());
+                    k.setFirstDown(k.getColour());
+                    k.setSecondDown(k.getSecondUp());
+                    ropesDown.set(i,ropesUp.get(i));
+                    ropesDown.set(i+1,ropesUp.get(i+1));
+                    i += 2;
+                    break;
+                case RIGHT_EMPTY:
+                    ropesDown.set(i,ropesUp.get(i));
+                    k.setColour(currentScheme.getRopeUp().get(ropesUp.get(i)).getColour());
+                    k.setFirstUp(k.getColour());
+                    k.setSecondUp(k.getColour());
+                    k.setFirstDown(k.getColour());
+                    k.setSecondDown(k.getColour());
+                    break;
+                case LEFT_EMPTY:
+                    ropesDown.set(0,ropesUp.get(0));
+                    k.setColour(currentScheme.getRopeUp().get(ropesUp.get(0)).getColour());
+                    k.setFirstUp(k.getColour());
+                    k.setSecondUp(k.getColour());
+                    k.setFirstDown(k.getColour());
+                    k.setSecondDown(k.getColour());
+                    i = 1;
+                    break;
+                default:
+                    break;
             }
-            if (i + 2 < ropesUp.size())
-                i += 2;
         }
     }
+
 
     public RowType getType() {
         return type;
@@ -161,5 +154,13 @@ public class Row
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public Scheme getCurrentScheme() {
+        return currentScheme;
+    }
+
+    public void setCurrentScheme(Scheme currentScheme) {
+        this.currentScheme = currentScheme;
     }
 }
